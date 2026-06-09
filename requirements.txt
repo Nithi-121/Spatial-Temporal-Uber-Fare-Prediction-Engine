@@ -1,0 +1,11 @@
+# Streamlit deployment requirements
+streamlit
+fastapi
+uvicorn[standard]
+joblib
+xgboost
+pandas
+numpy
+folium
+streamlit-folium
+scikit-learn

@@ -1,0 +1,120 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+@theme {
+  --color-uber-green: #06C167;
+  --color-uber-dark: #0F1117;
+  --color-uber-light-dark: #161922;
+  --color-uber-card: #1D212C;
+  --color-uber-border: #2A303F;
+  --color-uber-muted: #8A94A6;
+  --color-uber-accent-green: #10D876;
+  
+  --font-sans: "Outfit", "Inter", system-ui, sans-serif;
+  
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-ripple: ripple 1.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  --animate-shimmer: shimmer 2s infinite linear;
+  
+  @keyframes ripple {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+}
+
+body {
+  background-color: #0F1117;
+  color: #F1F5F9;
+  font-family: "Outfit", "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition-property: color, background-color;
+  transition-duration: 300ms;
+}
+
+/* Glassmorphism Panel */
+.glass-panel {
+  backdrop-filter: blur(12px);
+  background-color: rgba(22, 25, 34, 0.75);
+  border: 1px solid rgba(42, 48, 63, 0.6);
+}
+
+/* Glassmorphic Cards */
+.glass-card {
+  backdrop-filter: blur(16px);
+  background-color: rgba(29, 33, 44, 0.85);
+  border: 1px solid rgba(42, 48, 63, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom Webkit scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0F1117;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2A303F;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #06C167;
+}
+
+/* Leaflet overrides for dark tiles styling */
+.leaflet-container {
+  background-color: #0F1117 !important;
+  font-family: inherit;
+}
+
+.leaflet-bar {
+  border: 1px solid rgba(42, 48, 63, 0.8) !important;
+  box-shadow: none !important;
+}
+
+.leaflet-bar a {
+  background-color: #1D212C !important;
+  color: #F1F5F9 !important;
+  border-bottom: 1px solid rgba(42, 48, 63, 0.8) !important;
+  transition: all 0.2s ease;
+}
+
+.leaflet-bar a:hover {
+  background-color: #06C167 !important;
+  color: #0F1117 !important;
+}
+
+.leaflet-control-attribution {
+  background-color: rgba(15, 17, 23, 0.75) !important;
+  color: #64748B !important;
+  backdrop-filter: blur(4px);
+}
+
+/* PDF Printing Layout Configuration */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .glass-card, .glass-panel {
+    background: white !important;
+    color: black !important;
+    border: 1px solid #CBD5E1 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+}
