@@ -1,0 +1,6 @@
+[project]
+name = "spatial-temporal-uber-fare-prediction-engine"
+version = "0.1.0"
+
+[tool.vercel]
+entrypoint = "app.api:app"
