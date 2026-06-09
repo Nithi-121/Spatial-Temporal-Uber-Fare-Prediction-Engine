@@ -1,3 +1,15 @@
+import os
+import ctypes
+
+# HACK: Vercel AWS Lambda environment does not have libgomp.so.1 installed natively.
+# We explicitly load it into memory before joblib/xgboost to prevent ImportError crashes.
+try:
+    lib_path = os.path.join(os.path.dirname(__file__), "..", "lib", "libgomp.so.1")
+    if os.path.exists(lib_path):
+        ctypes.cdll.LoadLibrary(lib_path)
+except Exception:
+    pass
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field

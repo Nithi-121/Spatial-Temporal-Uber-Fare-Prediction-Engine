@@ -14,7 +14,7 @@
   ],
   "functions": {
     "app/api.py": {
-      "includeFiles": "models/**"
+      "includeFiles": "{models/**,lib/**}"
     }
   }
 }
