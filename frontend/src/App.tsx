@@ -7,7 +7,9 @@ import { ModelCard } from './components/ModelCard';
 import type { AnalyticsResponse } from './types/api';
 import { AlertCircle, Database, ExternalLink } from 'lucide-react';
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
+// In production (Vercel), set VITE_API_BASE_URL env variable to your backend URL.
+// When the backend is unreachable the app auto-falls back to client-side demo mode.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
 function App() {
   const [darkMode, setDarkMode] = useState(true);
