@@ -3,10 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import joblib
 import numpy as np
-import pandas as pd
 import os
 import datetime
 import gc
+# pandas is heavy; import lazily inside data loading when needed
+
 
 app = FastAPI(
     title="Spatial-Temporal Uber Fare Prediction Engine",
@@ -109,6 +110,8 @@ def load_and_prep_data():
     
     if os.path.exists(csv_path):
         try:
+            # Import pandas lazily – it may not be available in the minimal Vercel runtime
+            import pandas as pd
             print("Loading dataset for analytics calculations...")
             # Read essential columns only to save RAM
             df = pd.read_csv(csv_path, usecols=[
@@ -148,18 +151,16 @@ def load_and_prep_data():
             month_grp = df.groupby("month")["fare_amount"].mean().round(2).to_dict()
             analytics_cache["temporal_month"] = {str(k): v for k, v in month_grp.items()}
             
-            # Select ~1200 sample hotspots to avoid crushing React map renderers
+            # Sample hotspots (limit to 1200 entries)
             hotspots_df = df.sample(n=min(1200, len(df)), random_state=42)
             hotspots = []
             for _, r in hotspots_df.iterrows():
-                # Randomize slightly to make hotspots feel more active
                 hotspots.append({
                     "lat": float(r["pickup_latitude"]),
                     "lng": float(r["pickup_longitude"]),
                     "fare": float(r["fare_amount"]),
                     "type": "pickup"
                 })
-                # Add a few dropoffs as well
                 if len(hotspots) < 1200:
                     hotspots.append({
                         "lat": float(r["dropoff_latitude"]),
@@ -175,7 +176,6 @@ def load_and_prep_data():
             
         except Exception as e:
             print(f"Error loading and processing dataset: {e}")
-            # Load fallback data if CSV read fails
             load_fallbacks()
     else:
         print(f"Dataset not found at {csv_path}. Loading default fallbacks...")
@@ -223,6 +223,7 @@ def home():
 @app.post("/predict", response_model=PredictResponse)
 def predict(req: PredictRequest):
     model = get_model()
+    if model is None:
         raise HTTPException(status_code=503, detail="XGBoost model is not loaded on server.")
     
     # Calculate distance via Haversine
