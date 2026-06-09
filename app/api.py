@@ -35,8 +35,10 @@ def get_model():
             model = joblib.load(MODEL_PATH)
             print(f"XGBoost model lazy‑loaded from {MODEL_PATH}")
         except Exception as e:
-            print(f"Failed to lazy‑load XGBoost model: {e}")
-            raise
+            import traceback
+            error_msg = f"Failed to lazy‑load XGBoost model: {str(e)}\n{traceback.format_exc()}"
+            print(error_msg)
+            return {"error": error_msg}
     return model
 # Haversine distance formula (in km)
 def haversine(lat1, lon1, lat2, lon2):
@@ -216,15 +218,27 @@ def load_fallbacks():
 def home():
     return {
         "message": "Spatial-Temporal Uber Fare Prediction Engine running",
-        "model_loaded": get_model() is not None,
-        "analytics_ready": len(analytics_cache["hotspots"]) > 0
+        "model_loaded": model is not None,
+        "analytics_ready": len(analytics_cache.get("hotspots", [])) > 0
     }
+
+@app.get("/debug")
+def debug_info():
+    import sys
+    try:
+        m = get_model()
+        if isinstance(m, dict) and "error" in m:
+            return {"status": "error", "traceback": m["error"], "python_version": sys.version}
+        return {"status": "success", "message": "Model loaded fine", "python_version": sys.version}
+    except Exception as e:
+        import traceback
+        return {"status": "fatal_error", "traceback": traceback.format_exc(), "python_version": sys.version}
 
 @app.post("/predict", response_model=PredictResponse)
 def predict(req: PredictRequest):
-    model = get_model()
-    if model is None:
-        raise HTTPException(status_code=503, detail="XGBoost model is not loaded on server.")
+    m = get_model()
+    if m is None or (isinstance(m, dict) and "error" in m):
+        raise HTTPException(status_code=503, detail="XGBoost model is not loaded on server. Please check /debug endpoint.")
     
     # Calculate distance via Haversine
     dist_km = haversine(req.pickup_lat, req.pickup_lon, req.dropoff_lat, req.dropoff_lon)
@@ -249,7 +263,7 @@ def predict(req: PredictRequest):
     features = np.array([[dist_km, req.hour, weekday, req.day, req.month, is_peak, req.passengers]])
     
     try:
-        pred_base = float(model.predict(features)[0])
+        pred_base = float(m.predict(features)[0])
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Model prediction failed: {str(e)}")
         
