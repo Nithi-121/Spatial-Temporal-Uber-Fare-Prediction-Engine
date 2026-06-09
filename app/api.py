@@ -25,13 +25,18 @@ app.add_middleware(
 
 # Load XGBoost model
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "xgb_model.pkl")
-try:
-    model = joblib.load(MODEL_PATH)
-    print(f"XGBoost model loaded successfully from {MODEL_PATH}")
-except Exception as e:
-    print(f"Error loading XGBoost model: {e}")
-    model = None
-
+model = None
+def get_model():
+    global model
+    if model is None:
+        import joblib
+        try:
+            model = joblib.load(MODEL_PATH)
+            print(f"XGBoost model lazy‑loaded from {MODEL_PATH}")
+        except Exception as e:
+            print(f"Failed to lazy‑load XGBoost model: {e}")
+            raise
+    return model
 # Haversine distance formula (in km)
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371.0  # Earth radius in kilometers
@@ -99,7 +104,7 @@ analytics_cache = {
 # Startup logic for analytics data prep
 @app.on_event("startup")
 def load_and_prep_data():
-    csv_path = os.path.join(os.path.dirname(__file__), "..", "Data", "uber.csv", "uber.csv")
+    csv_path = os.path.join(os.path.dirname(__file__), "..", "Data", "uber.csv")
     print(f"Checking for dataset at: {csv_path}")
     
     if os.path.exists(csv_path):
@@ -211,13 +216,13 @@ def load_fallbacks():
 def home():
     return {
         "message": "Spatial-Temporal Uber Fare Prediction Engine running",
-        "model_loaded": model is not None,
+        "model_loaded": get_model() is not None,
         "analytics_ready": len(analytics_cache["hotspots"]) > 0
     }
 
 @app.post("/predict", response_model=PredictResponse)
 def predict(req: PredictRequest):
-    if not model:
+    model = get_model()
         raise HTTPException(status_code=503, detail="XGBoost model is not loaded on server.")
     
     # Calculate distance via Haversine
