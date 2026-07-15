@@ -1,0 +1,6 @@
+importance = pd.DataFrame({
+"    ""Feature"": X.columns,"
+"    ""Importance"": xgb.feature_importances_"
+})
+
+"importance.to_csv(""feature_importance.csv"", index=False)"

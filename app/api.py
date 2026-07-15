@@ -119,7 +119,7 @@ analytics_cache = {
 # Startup logic for analytics data prep
 @app.on_event("startup")
 def load_and_prep_data():
-    csv_path = os.path.join(os.path.dirname(__file__), "..", "Data", "uber.csv")
+    csv_path = os.path.join(os.path.dirname(__file__), "..", "data", "raw", "uber.csv")
     print(f"Checking for dataset at: {csv_path}")
     
     if os.path.exists(csv_path):
